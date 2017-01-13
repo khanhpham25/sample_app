@@ -2,6 +2,8 @@ class User < ApplicationRecord
   attr_accessor :remember_token, :activation_token, :reset_token
   scope :activated_users, -> {where activated: true}
 
+  has_many :microposts, dependent: :destroy
+
   before_save :email_downcase
   before_create :create_activation_digest
 
@@ -54,6 +56,10 @@ class User < ApplicationRecord
 
   def current_user? user
     self == user
+  end
+
+  def feeds
+    self.microposts
   end
 
   class << self

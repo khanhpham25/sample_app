@@ -13,6 +13,7 @@ class UsersController < ApplicationController
   end
 
   def show
+    @microposts = @user.microposts.recent_posts.paginate page: params[:page]
   end
 
   def create
@@ -47,14 +48,6 @@ class UsersController < ApplicationController
   private
   def user_params
     params.require(:user).permit :name, :email, :password, :password_confirmation
-  end
-
-  def logged_in_user
-    unless logged_in?
-      store_location
-      flash[:danger] = "Please log in."
-      redirect_to login_path
-    end
   end
 
   def find_user
