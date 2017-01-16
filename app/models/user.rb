@@ -3,6 +3,13 @@ class User < ApplicationRecord
   scope :activated_users, -> {where activated: true}
 
   has_many :microposts, dependent: :destroy
+  has_many :active_relationships, class_name: Relationship.name,
+    foreign_key: "follower_id", dependent: :destroy
+  has_many :passive_relationships, class_name: Relationship.name,
+    foreign_key: "followed_id", dependent: :destroy
+
+  has_many :following, through: :active_relationships, source: :followed
+  has_many :followers, through: :passive_relationships, source: :follower
 
   before_save :email_downcase
   before_create :create_activation_digest
@@ -59,7 +66,20 @@ class User < ApplicationRecord
   end
 
   def feeds
-    self.microposts
+    users_id = following_ids.push id
+    Micropost.followed_posts users_id
+  end
+
+  def follow other_user
+    active_relationships.create followed_id: other_user.id
+  end
+
+  def unfollow other_user
+    following.delete other_user
+  end
+
+  def following? other_user
+    following.include? other_user
   end
 
   class << self

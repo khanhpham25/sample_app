@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_action :logged_in_user, only: [:index, :edit, :update]
+  before_action :logged_in_user, except: [:new, :create, :destroy]
   before_action :correct_user, only: [:edit, :update]
   before_action :find_user, only: [:show, :destroy]
   before_action :admin_user, only: :destroy
@@ -14,6 +14,11 @@ class UsersController < ApplicationController
 
   def show
     @microposts = @user.microposts.recent_posts.paginate page: params[:page]
+    @relationship = if current_user.following? @user
+      current_user.active_relationships.find_by followed_id: @user.id
+    else
+      current_user.active_relationships.build
+    end
   end
 
   def create
@@ -52,11 +57,9 @@ class UsersController < ApplicationController
 
   def find_user
     @user = User.find_by id: params[:id]
-    if @user.nil?
+    unless @user
       flash[:warning] = "Couldn't find this user. Please try again!"
       redirect_to root_path
-    else
-      redirect_to root_url and return unless @user.activated?
     end
   end
 
