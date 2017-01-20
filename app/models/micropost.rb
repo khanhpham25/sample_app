@@ -1,5 +1,6 @@
 class Micropost < ApplicationRecord
   scope :recent_posts, -> {order created_at: :desc}
+  scope :followed_posts, -> user_ids{where "user_id IN (?)", user_ids}
   mount_uploader :picture, PictureUploader
 
   belongs_to :user

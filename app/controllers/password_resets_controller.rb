@@ -33,7 +33,7 @@ class PasswordResetsController < ApplicationController
     else
       render :edit
     end
-  endo
+  end
 
   private
   def user_params
